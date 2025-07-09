@@ -1,23 +1,43 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useEffect, useState } from "react";
+import "./App.css";
 
 function App() {
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("https://www.reddit.com/r/reactjs.json")
+      .then((res) => res.json())
+      .then((data) => {
+        const children = data.data.children;
+        setPosts(children.map((child) => child.data));
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error("Error fetching data:", error);
+        setLoading(false);
+      });
+  }, []);
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <h1>r/reactjs Posts</h1>
+      {loading ? (
+        <p>Loading...</p>
+      ) : (
+        <div className="card-container">
+          {posts.map((post, index) => (
+            <div className="card" key={index}>
+              <h2>{post.title}</h2>
+              <p>{post.selftext ? post.selftext : "No description available."}</p>
+              <a href={post.url} target="_blank" rel="noopener noreferrer">
+                Visit Post
+              </a>
+              <p className="score">Score: {post.score}</p>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
